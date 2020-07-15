@@ -1,16 +1,16 @@
 .transactionsHistory {
     margin: 0 auto;
-    width: 874px;
     text-align: center;
     border-collapse: collapse;
+    width: auto;
+    display: block;
     font-family: 'Roboto', sans-serif;
   }
   .transactionsHistory td,
   .transactionsHistory th {
     border: 1px solid #ddd;
-    padding: 20px;
+    padding: 6px 10px;
     color: #5c6975;
-    width: 30%;
   }
   .transactionsHistory tr {
     background-color: #fff;
@@ -21,9 +21,17 @@
   }
   
   .transactionsHistory th {
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     background-color: #ebeef2;
     color: #272727;
     text-transform: uppercase;
+  }
+  .mainPrice {
+    color: #000;
+    font-weight: bold;
+  }
+  .transactionsHistory ul {
+    list-style: none;
+    padding: 0;
   }

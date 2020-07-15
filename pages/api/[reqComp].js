@@ -6,7 +6,7 @@ export default (req, res) => {
   const {
     query: { reqComp },
   } = req
-  axios
+  req && axios
     .post(
       `https://api.mouser.com/api/v1/search/keyword?apiKey=75e8de15-dc41-4463-9677-597a017b1eb0`,
       {
