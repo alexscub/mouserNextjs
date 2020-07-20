@@ -17,6 +17,8 @@ function useResult (query) {
 export default function Home() {
 const [query, getQuery] = useState('');
 const { products, isLoading, isError } = useResult(query);
+console.log('data', products)
+console.log('error', isError)
 
   return (
       <main>
