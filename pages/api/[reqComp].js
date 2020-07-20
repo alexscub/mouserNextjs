@@ -1,11 +1,9 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import axios from 'axios';
-// const MouserKey = '75e8de15-dc41-4463-9677-597a017b1eb0'
-// const TMEPublicKey = 'b8008cca0cece8636c05ad865043e92b6fed7991da5f7'
-// const TMESecret = '6aadcca695acd0d2702a';
-const MouserKey = process.env.MouserKey
-const TMEPublicKey = process.env.TMEPublicKey
-const TMESecret = process.env.TMESecret
+
+const MouserKey = process.env.MouserKey;
+const TMEPublicKey = process.env.TMEPublicKey;
+const TMESecret = process.env.TMESecret;
 
 const  {
   TmeApiClient
