@@ -2,8 +2,8 @@
     margin: 0 auto;
     text-align: center;
     border-collapse: collapse;
-    width: auto;
-    display: block;
+    text-align: center;
+    /* display: block; */
     font-family: 'Roboto', sans-serif;
   }
   .transactionsHistory td,

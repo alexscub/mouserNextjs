@@ -1,14 +1,28 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import axios from 'axios';
+import { TmeApiClient } from 'tme-api-client';
 
 const MouserKey = process.env.MOUSER_KEY;
 const TMEPublicKey = process.env.TME_KEY;
 const TMESecret = process.env.TME_SECRET;
 
-const  {
-  TmeApiClient
-} = require ('tme-api-client');
+// функция конструктор для создания обьекта с нужными ключами
 
+function FormatedPartNumber(MouserPartNumber,ImagePath,ProductDetailUrl,
+  ManufacturerPartNumber,Manufacturer,Description,Availability,PriceBreaks, Min, Mult) {
+            this.MouserPartNumber = MouserPartNumber;
+            this.ImagePath = ImagePath;
+            this.ProductDetailUrl = ProductDetailUrl;
+            this.ManufacturerPartNumber = ManufacturerPartNumber || MouserPartNumber;
+            this.Manufacturer = Manufacturer;
+            this.Description = Description;
+            this.Availability = Availability;
+            this.PriceBreaks = PriceBreaks;
+            this.Min = Min;
+            this.Mult = Mult;
+  }
+
+// получаем данные с первого апи
 const getTMEItems = (reqComp) => {
   const client = new TmeApiClient(TMEPublicKey, TMESecret);
   return client.request('Products/Search', {
@@ -18,61 +32,67 @@ const getTMEItems = (reqComp) => {
       "Country": "UA",
     })
     .then(data => {
-      // res.json(data.data.Data.ProductList)
-      return data.data.Data.ProductList;})
-      //Взять отсюда еще можно Producer, Photo, ProductInformationPage, Description, MinAmount, 
-      //Multiples,
-      .then(ProductList=> {
-        const symbols = ProductList.map(el=>el.Symbol) 
-      // res.json(ProductList)
-      return client.request('Products/GetPricesAndStocks', {"SymbolList": symbols,
-      "Country": "UA",
-      "Currency":'USD',
-      "Language": "EN",
-    })      
-    .then(data=> {
-      const priceStockList = data.data.Data.ProductList
-      const resultedArr = ProductList.map(el=>{
-        const elPriceList = priceStockList.find(stock=>el.Symbol===stock.Symbol);
-        return {...el, ...elPriceList}
+      // получили список продуктов, но без цен и стока такое апи, ничего не поделать
+      return data.data.Data.ProductList;
+    })
+    //Взять отсюда еще можно Producer, Photo, ProductInformationPage, Description, MinAmount, 
+    //Multiples, делаем запрос за ценами
+    .then(ProductList => {
+      // если массив пустой возвращаем его (такие продукты не найдены)
+      if( ProductList.length===0) {return []} else {
+      const symbols = ProductList.map(el => el.Symbol)
+      return client.request('Products/GetPricesAndStocks', {
+          "SymbolList": symbols,
+          "Country": "UA",
+          "Currency": 'USD',
+          "Language": "EN",
         })
-        const result = resultedArr.map(el=>{
-          const newEl = {}
-          newEl.MouserPartNumber=el.Symbol;
-          newEl.ImagePath=el.Photo;
-          newEl.ProductDetailUrl=el.ProductInformationPage;
-          newEl.ManufacturerPartNumber=el.OriginalSymbol;
-          newEl.Manufacturer=el.Producer;
-          newEl.Description=el.Description;
-          newEl.Availability=el.Amount;
-          newEl.PriceBreaks=el.PriceList.map(el=>{
-            const priceBreak = {}
-            priceBreak.Quantity = el.Amount;
-            priceBreak.Price = String(el.PriceValue);
-            return priceBreak;
+        .then(data => {
+          //получаем цены
+          const priceStockList = data.data.Data.ProductList
+          //добавляем в продукты прайс
+          const resultedArr = ProductList.map(el => {
+            const elPriceList = priceStockList.find(stock => el.Symbol === stock.Symbol);
+            return {
+              ...el,
+              ...elPriceList
+            }
           })
-          return newEl
+          // преобразуем ключи обьекта
+          const result = resultedArr.map(el => {
+            //преобразуем матрицу цен
+            const PriceBreaks = el.PriceList.map(el => {
+              const priceBreak = {}
+              priceBreak.Quantity = el.Amount;
+              priceBreak.Price = String(el.PriceValue);
+              return priceBreak;
+            })
+            return new FormatedPartNumber(el.Symbol, el.Photo, el.ProductInformationPage, el.OriginalSymbol,
+              el.Producer, el.Description, el.Amount, PriceBreaks,el.MinAmount, el.Multiples )
+          })
+          return result
         })
-      return result})
-      .catch(err => err);
+        .catch(err => err);}
     })
     .catch(err => err);
 }
 
+// получаем данные со второго апи, здесь проще
+
 const getMouserItems = (reqComp) => {
-return axios
-.post(
-  `https://api.mouser.com/api/v1/search/keyword?apiKey=${MouserKey}`,
-  {
-    "SearchByKeywordRequest": {
-      "keyword":  reqComp,
-      "searchOptions": 'InStock'
-    }
-  }
-)
-.then(data => {
-  return data.data.SearchResults.Parts})
-.catch(err=> err);
+  return axios
+    .post(
+      `https://api.mouser.com/api/v1/search/keyword?apiKey=${MouserKey}`, {
+        "SearchByKeywordRequest": {
+          "keyword": reqComp,
+          "searchOptions": 'InStock'
+        }
+      }
+    )
+    .then(data => {
+      return data.data.SearchResults.Parts
+    })
+    .catch(err => err);
 }
 
 axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -83,84 +103,20 @@ export default (req, res) => {
       reqComp
     },
   } = req
-  // reqComp && axios
-  //   .post(
-  //     `https://api.mouser.com/api/v1/search/keyword?apiKey=75e8de15-dc41-4463-9677-597a017b1eb0`,
-  //     {
-  //       "SearchByKeywordRequest": {
-  //         "keyword":  reqComp,
-  //         "searchOptions": 'InStock'
-  //       }
-  //     }
-  //   )
-  //   .then(data => {
-  //     res.json(data.data.SearchResults.Parts)})
-  //   .catch(err=>console.log(err));
-  // getMouserItems(reqComp).then(data=>res.json(data)).catch(err=>res.json(err))
-  // getTMEItems(reqComp).then(data=>res.json(data)).catch(err=>res.json(err))
-  reqComp && getMouserItems(reqComp).then(mouserProducts=>{
+
+  reqComp && getMouserItems(reqComp).then(mouserProducts => {
     getTMEItems(reqComp)
-    .then(TMEProducts => [...mouserProducts, ...TMEProducts])
-    .then(AllProducts=> AllProducts.sort(function(a, b){
-      let nameA=a.ManufacturerPartNumber, nameB=b.ManufacturerPartNumber
-      if (nameA < nameB) //сортируем строки по возрастанию
-        return -1
-      if (nameA > nameB)
-        return 1
-      return 0 // Никакой сортировки
-      }))
-      .then(data=>res.json(data))
-  }).catch(err=>res.json(err))
-
-  // https://api.tme.eu/[prefix]/[action_name].[response_format]
-  // const TMEPublicKey = 'b8008cca0cece8636c05ad865043e92b6fed7991da5f7'
-  // const TMESecret = '6aadcca695acd0d2702a';
-
-  // const client = new TmeApiClient(TMEPublicKey, TMESecret);
-
-  // client.request('Products/Search', {
-  //     "SearchPlain": reqComp,
-  //     "SearchWithStock": true,
-  //     "Language": "EN",
-  //     "Country": "UA",
-  //   })
-  //   .then(data => {
-  //     // res.json(data.data.Data.ProductList)
-  //     const {ProductList} = data.data.Data;
-  //     //Взять отсюда еще можно Producer, Photo, ProductInformationPage, Description, MinAmount, 
-  //     //Multiples,
-  //     const symbols = ProductList.map(el=>el.Symbol) 
-  //     // res.json(ProductList)
-  //     client.request('Products/GetPricesAndStocks', {"SymbolList": symbols,
-  //     "Country": "UA",
-  //     "Currency":'USD',
-  //     "Language": "EN",
-  //   })
-  //   .then(data=> {
-  //     const priceStockList = data.data.Data.ProductList
-  //     const resultedArr = ProductList.map(el=>{
-  //       const elPriceList = priceStockList.find(stock=>el.Symbol===stock.Symbol);
-  //       return {...el, ...elPriceList}
-  //       })
-  //       const result = resultedArr.map(el=>{
-  //         const newEl = {}
-  //         newEl.MouserPartNumber=el.Symbol;
-  //         newEl.ImagePath=el.Photo;
-  //         newEl.ProductDetailUrl=el.ProductInformationPage;
-  //         newEl.ManufacturerPartNumber=el.OriginalSymbol;
-  //         newEl.Manufacturer=el.Producer;
-  //         newEl.Description=el.Description;
-  //         newEl.Availability=el.Amount;
-  //         newEl.PriceBreaks=el.PriceList.map(el=>{
-  //           const priceBreak = {}
-  //           priceBreak.Quantity = el.Amount;
-  //           priceBreak.Price = String(el.PriceValue);
-  //           return priceBreak;
-  //         })
-  //         return newEl
-  //       })
-  //     res.json(result)})
-  //     .catch(err => res.json(err));
-  //   })
-  //   .catch(err => res.json(err));
+      .then(TMEProducts => [...mouserProducts, ...TMEProducts])
+      //сортировку перенес на клиент
+      // .then(AllProducts => AllProducts.sort(function (a, b) {
+      //   let nameA = a.ManufacturerPartNumber,
+      //     nameB = b.ManufacturerPartNumber
+      //   if (nameA < nameB) //сортируем строки по возрастанию
+      //     return -1
+      //   if (nameA > nameB)
+      //     return 1
+      //   return 0 // Никакой сортировки
+      // }))
+      .then(data => res.json(data))
+  }).catch(err => res.json(err))
 }
