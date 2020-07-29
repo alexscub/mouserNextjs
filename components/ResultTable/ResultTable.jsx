@@ -4,22 +4,25 @@ import ReactTooltip from "react-tooltip";
 
 
 // const calcUahPrice = (uspPrice) => Math.ceil(+/\d*\.?\d*$/.exec(uspPrice)*4300)/100;
-const calcUahPrice = (uspPrice) => Math.ceil(+(uspPrice.replace("$", "").replace(",", ""))*4300)/100;
+const calcUahPrice = (usdPrice) => Math.ceil(+(usdPrice.replace("$", "").replace(",", ""))*4300)/100;
 const ResultTable = ({items}) => {
   const addDefaultSrc = ev => {
     // eslint-disable-next-line no-param-reassign
     ev.target.src = '/noimage.png';
   };
-  items.sort(function (a, b) {
-    let nameA = a.ManufacturerPartNumber,
-      nameB = b.ManufacturerPartNumber
-    if (nameA < nameB) //сортируем строки по возрастанию
-      return -1
-    if (nameA > nameB)
-      return 1
-    return 0 // Никакой сортировки
-  })
+  // items.sort(function (a, b) {
+  //   let nameA = a.ManufacturerPartNumber,
+  //     nameB = b.ManufacturerPartNumber
+  //   if (nameA < nameB) //сортируем строки по возрастанию
+  //     return -1
+  //   if (nameA > nameB)
+  //     return 1
+  //   return 0 // Никакой сортировки
+  // })
     return (
+      // <>
+      // {items.map(item => ( <p>{item.MouserPartNumber} </p>))}
+      // </>
       <table className={styles.transactionsHistory}>
       <thead>
         <tr>

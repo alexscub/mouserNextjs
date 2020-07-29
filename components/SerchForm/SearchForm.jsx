@@ -16,7 +16,6 @@ export default function SearchForm ({onSubmit}) {
       <form className={styles.searchForm} onSubmit={handleSubmit}>
         <input
           type="text"
-          autoComplete="off"
           placeholder="Search components..."
           onChange={handleChange}
           value={query}

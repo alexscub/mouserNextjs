@@ -104,8 +104,10 @@ export default (req, res) => {
     },
   } = req
 
-  reqComp && getMouserItems(reqComp).then(mouserProducts => {
-    getTMEItems(reqComp)
+  const decodedReqComp = decodeURIComponent(reqComp);
+
+  decodedReqComp && getMouserItems(decodedReqComp).then(mouserProducts => {
+    getTMEItems(decodedReqComp)
       .then(TMEProducts => [...mouserProducts, ...TMEProducts])
       //сортировку перенес на клиент
       // .then(AllProducts => AllProducts.sort(function (a, b) {
