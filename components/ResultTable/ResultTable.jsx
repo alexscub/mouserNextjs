@@ -20,9 +20,6 @@ const ResultTable = ({items}) => {
   //   return 0 // Никакой сортировки
   // })
     return (
-      // <>
-      // {items.map(item => ( <p>{item.MouserPartNumber} </p>))}
-      // </>
       <table className={styles.transactionsHistory}>
       <thead>
         <tr>
@@ -43,7 +40,7 @@ const ResultTable = ({items}) => {
             <td><a data-tip={item.Description} href={item.ProductDetailUrl} target="blank">{item.ManufacturerPartNumber}</a>
             <ReactTooltip /></td>
             <td>{item.Manufacturer}</td>
-            <td>{item.Availability}</td>
+            <td>{item.Availability || item.RestrictionMessage}</td>
             <td>min{item.Min}/mult{item.Mult}</td>
             <td><ul>{item.PriceBreaks.map(el=><li key={item.MouserPartNumber+el.Quantity}>{el.Quantity}</li>)}</ul></td>
             <td><ul>{item.PriceBreaks.map(el=><li key={item.MouserPartNumber+el.Quantity+"USD"}>{el.Price}</li>)}</ul></td>

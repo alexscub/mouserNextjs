@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const MouserKey = process.env.MOUSER_KEY;
 
-// получаем данные свнешнего апи
+// получаем данные с внешнего апи
 
 const getMouserItems = (reqComp, startingRecord) => {
   return axios
@@ -23,6 +23,7 @@ const getMouserItems = (reqComp, startingRecord) => {
 
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
+//Для пагинации получаем начальную страницу и запрос
 export default (req, res) => {
   res.statusCode = 200;
   const {
@@ -36,8 +37,7 @@ export default (req, res) => {
   const decodedReqComp = decodeURIComponent(reqComp);
 
   !!decodedReqComp && getMouserItems(decodedReqComp,startingRecord)
-  .then(mouserResults => { console.log(mouserResults)
-    // mouserResults.SearchResults.next = `/api/${startingRecord+50}/${reqComp}`;
-    return res.json(mouserResults.SearchResults)})
+  .then(mouserResults => {
+    return res.json(mouserResults)})
   .catch(err => res.json(err))
 }
