@@ -29,7 +29,6 @@ const ResultTable = ({items}) => {
           <th>Availability</th>
           <th>Min/Mult</th>
           <th>Quantity</th>
-<!--           <th>Prices</th> -->
           <th>Prices UAH</th>
         </tr>
       </thead>
@@ -44,7 +43,6 @@ const ResultTable = ({items}) => {
             <td>{item.Availability || item.RestrictionMessage}</td>
             <td>min{item.Min}/mult{item.Mult}</td>
             <td><ul>{item.PriceBreaks.map(el=><li key={item.MouserPartNumber+el.Quantity}>{el.Quantity}</li>)}</ul></td>
-<!--             <td><ul>{item.PriceBreaks.map(el=><li key={item.MouserPartNumber+el.Quantity+"USD"}>{el.Price}</li>)}</ul></td> -->
             <td><ul>{item.PriceBreaks.map(el=><li key={item.MouserPartNumber+el.Quantity+"UAH"} className={styles.mainPrice}>{calcUahPrice(el.Price)}</li>)}</ul></td>
           </tr>
           
