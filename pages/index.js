@@ -31,7 +31,7 @@ export default function Home() {
     const result = await axios(
       `/api/${loadedResults}/${encodeURIComponent(query)}`,
     );
-    console.log(result)
+    // console.log(result)
     const { SearchResults } = result.data;
     const { Errors } = result.data;
     if (SearchResults) {
